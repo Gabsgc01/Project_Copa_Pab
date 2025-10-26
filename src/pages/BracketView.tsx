@@ -8,6 +8,7 @@ import Footer from '@/components/Footer'
 import MatchResult from '@/components/MatchResult'
 import { BracketGenerator, type Bracket } from '@/utils/bracketGenerator'
 import { FaArrowLeft, FaTrophy, FaCalendarAlt } from 'react-icons/fa'
+import { formatDateBR } from '@/utils/timeUtils'
 
 const BracketView = () => {
   const { id } = useParams()
@@ -105,7 +106,7 @@ const BracketView = () => {
             <div className="flex items-center gap-4 text-gray-600 mt-2">
               <div className="flex items-center gap-1">
                 <FaCalendarAlt />
-                <span>{new Date(tournament.date).toLocaleDateString('pt-BR')}</span>
+                <span>{formatDateBR(tournament.date)}</span>
               </div>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 bracket.status === 'finished' ? 'bg-green-100 text-green-800' :

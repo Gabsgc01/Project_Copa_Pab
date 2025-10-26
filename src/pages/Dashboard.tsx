@@ -5,6 +5,7 @@ import { useTournaments } from '@/contexts/TournamentContext'
 import NavigationHeader from '@/components/NavigationHeader'
 import Footer from '@/components/Footer'
 import { FaUser, FaUsers, FaPhone, FaMapMarkerAlt, FaEnvelope, FaTrophy, FaCalendarAlt, FaClock } from 'react-icons/fa'
+import { isTournamentFinished, formatDateBR } from '@/utils/timeUtils'
 
 const Dashboard = () => {
   const { user, isLoggedIn, getEnrolledTournaments } = useAuth()
@@ -162,16 +163,16 @@ const Dashboard = () => {
                         <p className="font-medium text-gray-800">{tournament.title}</p>
                         <p className="text-sm text-gray-600 flex items-center gap-1">
                           <FaCalendarAlt className="w-3 h-3" />
-                          {new Date(tournament.date).toLocaleDateString('pt-BR')}
+                          {formatDateBR(tournament.date)}
                         </p>
                       </div>
                       <span className={`px-2 py-1 rounded text-xs ${
                         tournament.status === 'published' ? 'bg-green-100 text-green-800' :
-                        tournament.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                        isTournamentFinished(tournament) ? 'bg-blue-100 text-blue-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
                         {tournament.status === 'published' ? 'Publicado' :
-                         tournament.status === 'completed' ? 'Finalizado' : 'Rascunho'}
+                         isTournamentFinished(tournament) ? 'Finalizado' : 'Rascunho'}
                       </span>
                     </div>
                   ))}
@@ -197,13 +198,13 @@ const Dashboard = () => {
                           <p className="font-medium text-gray-800">{tournament.title}</p>
                           <p className="text-sm text-gray-600 flex items-center gap-1">
                             <FaCalendarAlt className="w-3 h-3" />
-                            {new Date(tournament.date).toLocaleDateString('pt-BR')}
+                              {formatDateBR(tournament.date)}
                           </p>
                         </div>
                         <span className={`px-2 py-1 rounded text-xs ${
-                          new Date(tournament.date) > new Date() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                          !isTournamentFinished(tournament) ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {new Date(tournament.date) > new Date() ? 'Próximo' : 'Finalizado'}
+                          {!isTournamentFinished(tournament) ? 'Próximo' : 'Finalizado'}
                         </span>
                       </div>
                     )
@@ -237,12 +238,12 @@ const Dashboard = () => {
             
             {getEnrolledTournaments().filter(tournamentId => {
               const tournament = getTournament(tournamentId)
-              return tournament && new Date(tournament.date) < new Date()
+              return tournament && isTournamentFinished(tournament)
             }).length > 0 ? (
               <div className="space-y-3">
                 {getEnrolledTournaments()
                   .map(tournamentId => getTournament(tournamentId))
-                  .filter(tournament => tournament && new Date(tournament.date) < new Date())
+                  .filter(tournament => tournament && isTournamentFinished(tournament))
                   .slice(0, 5)
                   .map(tournament => (
                     <div key={tournament!.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -254,7 +255,7 @@ const Dashboard = () => {
                         </p>
                         <p className="text-sm text-gray-600 flex items-center gap-1">
                           <FaCalendarAlt className="w-3 h-3" />
-                          {new Date(tournament!.date).toLocaleDateString('pt-BR')}
+                          {formatDateBR(tournament!.date)}
                         </p>
                       </div>
                       <Button variant="outline" size="sm" asChild>

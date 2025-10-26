@@ -172,10 +172,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!foundUser) {
         return { success: false, message: 'Nome do time ou senha incorretos!' }
-      }
-
-      // Login bem-sucedido
+      }      // Login bem-sucedido
       const { password: _, ...userWithoutPassword } = foundUser
+      
+      // Se é o primeiro login e não há inscrições, adicionar algumas inscrições de exemplo
+      if (!userWithoutPassword.enrolledTournaments || userWithoutPassword.enrolledTournaments.length === 0) {
+        userWithoutPassword.enrolledTournaments = ['1', '3'] // Inscrever nos torneios 1 e 3 automaticamente
+        
+        // Atualizar no storage
+        const users = JSON.parse(localStorage.getItem('users') || '[]') as StoredUser[]
+        const updatedUsers = users.map(u => 
+          u.id === userWithoutPassword.id 
+            ? { ...u, enrolledTournaments: userWithoutPassword.enrolledTournaments }
+            : u
+        )
+        localStorage.setItem('users', JSON.stringify(updatedUsers))
+      }
+      
       setUser(userWithoutPassword)
       localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword))
 

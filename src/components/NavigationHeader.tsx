@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from './ui/button'
 import { FaUser, FaSignInAlt, FaUserPlus, FaCog, FaSignOutAlt, FaChevronDown, FaHome, FaTrophy, FaUsers } from 'react-icons/fa'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 const NavigationHeader = () => {
   const navigate = useNavigate()
@@ -21,10 +22,29 @@ const NavigationHeader = () => {
 
 
   const handleLogout = () => {
-    if (confirm('Tem certeza que deseja sair?')) {
-      logout()
-      setShowDropdown(false)
-    }
+    openConfirm({
+      message: 'Tem certeza que deseja sair?',
+      onConfirm: () => {
+        logout()
+        setShowDropdown(false)
+      }
+    })
+  }
+
+  // Modal state
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   // Verifica se a rota atual é ativa
@@ -94,9 +114,7 @@ const NavigationHeader = () => {
                 >
                   <FaCog className="text-sm" />
                   <span>Dashboard</span>
-                </Link>
-
-                <Link 
+                </Link>                <Link 
                   to="/jogadoras" 
                   className={`flex items-center space-x-2 text-gray-contrast hover:text-hot-pink transition-colors font-medium text-sm font-button ${
                     isActiveRoute('/jogadoras') ? 'text-hot-pink font-bold' : ''
@@ -104,6 +122,16 @@ const NavigationHeader = () => {
                 >
                   <FaUsers className="text-sm" />
                   <span>Jogadoras</span>
+                </Link>
+
+                <Link 
+                  to="/minhas-inscricoes" 
+                  className={`flex items-center space-x-2 text-gray-contrast hover:text-hot-pink transition-colors font-medium text-sm font-button ${
+                    isActiveRoute('/minhas-inscricoes') ? 'text-hot-pink font-bold' : ''
+                  }`}
+                >
+                  <FaTrophy className="text-sm" />
+                  <span>Minhas Inscrições</span>
                 </Link>
               </>
             )}
@@ -291,6 +319,13 @@ const NavigationHeader = () => {
           )}
         </nav>
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </header>
   )
 }

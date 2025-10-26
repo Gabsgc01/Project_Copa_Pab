@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { formatDateBR } from '@/utils/timeUtils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Match } from '@/utils/bracketGenerator'
@@ -117,7 +118,7 @@ const MatchResult: React.FC<MatchResultProps> = ({ match, onUpdateResult, isAdmi
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="text-sm text-gray-600 space-y-1">
             {match.date && (
-              <div>📅 {new Date(match.date).toLocaleDateString('pt-BR')}</div>
+              <div>📅 {formatDateBR(match.date)}</div>
             )}
             {match.time && (
               <div>🕐 {match.time}</div>

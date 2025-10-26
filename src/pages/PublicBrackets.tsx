@@ -11,6 +11,7 @@ import {
   FaEye,
   FaClock
 } from 'react-icons/fa'
+import { formatDateBR } from '@/utils/timeUtils'
 
 interface PublicTournament {
   id: string
@@ -37,9 +38,7 @@ const PublicBrackets = () => {
     setTournaments(publicTournaments)
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
-  }
+  const formatDate = (dateString: string) => formatDateBR(dateString)
 
   if (viewingTournament) {
     return (

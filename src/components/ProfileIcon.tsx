@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from './ui/button'
@@ -27,10 +28,29 @@ const ProfileIcon = () => {
   }
 
   const handleLogout = () => {
-    if (confirm('Tem certeza que deseja sair?')) {
-      logout()
-      setShowDropdown(false)
-    }
+    openConfirm({
+      message: 'Tem certeza que deseja sair?',
+      onConfirm: () => {
+        logout()
+        setShowDropdown(false)
+      }
+    })
+  }
+
+  // Modal state
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   return (
@@ -121,6 +141,13 @@ const ProfileIcon = () => {
           </Button>
         </div>
       )}
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

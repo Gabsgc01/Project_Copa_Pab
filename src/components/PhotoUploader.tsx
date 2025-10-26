@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { Button } from './ui/button'
 import { FaCamera, FaTrash, FaEye, FaCheckCircle, FaExclamationTriangle, FaSpinner } from 'react-icons/fa'
 import { DocumentValidator } from '../utils/documentValidator'
@@ -110,14 +111,33 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   }
 
   const handleRemovePhoto = () => {
-    if (confirm('Tem certeza que deseja remover esta foto?')) {
-      setPreviewUrl(null)
-      onPhotoChange(null)
-      setValidationResult(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+    openConfirm({
+      message: 'Tem certeza que deseja remover esta foto?',
+      onConfirm: () => {
+        setPreviewUrl(null)
+        onPhotoChange(null)
+        setValidationResult(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
       }
-    }
+    })
+  }
+
+  // Modal state
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   const handleButtonClick = () => {
@@ -256,6 +276,14 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

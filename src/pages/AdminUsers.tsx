@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { 
@@ -73,13 +74,33 @@ const AdminUsers = () => {
   const cities = [...new Set(users.map(user => user.city))].filter(Boolean).sort()
 
   const handleDeleteUser = (user: User) => {
-    if (confirm(`Tem certeza que deseja excluir o time "${user.teamName}"? Esta ação não pode ser desfeita.`)) {
-      deleteUser(user.id)
-      loadUsers()
-      if (showUserDetail?.id === user.id) {
-        setShowUserDetail(null)
+    openConfirm({
+      title: 'Excluir Time',
+      message: `Tem certeza que deseja excluir o time "${user.teamName}"? Esta ação não pode ser desfeita.`,
+      onConfirm: () => {
+        deleteUser(user.id)
+        loadUsers()
+        if (showUserDetail?.id === user.id) {
+          setShowUserDetail(null)
+        }
       }
-    }
+    })
+  }
+
+  // Modal de confirmação
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   const startEdit = (user: User) => {
@@ -478,6 +499,13 @@ const AdminUsers = () => {
           </div>
         )}
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

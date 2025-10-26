@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import NavigationHeader from '@/components/NavigationHeader'
 import BracketViewer from '@/components/BracketViewer'
 import Footer from '@/components/Footer'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { BracketGenerator, type Bracket, type Team } from '@/utils/bracketGenerator'
 import { FaTrophy, FaRandom, FaPlus } from 'react-icons/fa'
 
@@ -56,14 +57,34 @@ const BracketDemo = () => {
   const handleRemoveTeam = (teamId: string) => {
     if (!bracket) return
     
-    if (confirm('Tem certeza que deseja remover este time? O chaveamento será regenerado.')) {
-      try {
-        const updatedBracket = BracketGenerator.removeTeamFromBracket(bracket, teamId)
-        setBracket(updatedBracket)
-      } catch (error) {
-        alert(`Erro ao remover time: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    openConfirm({
+      title: 'Remover Time',
+      message: 'Tem certeza que deseja remover este time? O chaveamento será regenerado.',
+      onConfirm: () => {
+        try {
+          const updatedBracket = BracketGenerator.removeTeamFromBracket(bracket, teamId)
+          setBracket(updatedBracket)
+        } catch (error) {
+          alert(`Erro ao remover time: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+        }
       }
-    }
+    })
+  }
+
+  // Modal state for confirmations
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   return (
@@ -187,6 +208,13 @@ const BracketDemo = () => {
           </div>
         )}
       </div>
+        <ConfirmModal
+          open={confirmOpen}
+          title={confirmTitle}
+          message={confirmMessage}
+          onConfirm={confirmAction}
+          onCancel={() => setConfirmOpen(false)}
+        />
 
       <Footer />
     </div>

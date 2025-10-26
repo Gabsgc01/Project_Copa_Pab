@@ -4,7 +4,10 @@ import { useTournaments } from '@/contexts/TournamentContext'
 import { useAuth } from '@/contexts/AuthContext'
 import NavigationHeader from '@/components/NavigationHeader'
 import Footer from '@/components/Footer'
-import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaTrophy, FaInfoCircle, FaEnvelope, FaArrowLeft } from 'react-icons/fa'
+import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaInfoCircle, FaEnvelope, FaArrowLeft } from 'react-icons/fa'
+import { isTournamentFinished, formatDateBR } from '@/utils/timeUtils'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useState } from 'react'
 
 const TournamentDetails = () => {
   const { id } = useParams()
@@ -28,17 +31,43 @@ const TournamentDetails = () => {
         <Footer />
       </div>
     )
+    }
+    // Estado e helper para modal de confirmação
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
+
   const handleEnrollment = () => {
     if (!tournament || !user) return
     
     if (isEnrolled) {
-      unenrollFromTournament(tournament.id)
-      unenrollTeamFromTournament(tournament.id, user.id)
+      openConfirm({
+        title: 'Cancelar Inscrição',
+        message: `Tem certeza que deseja cancelar sua inscrição no torneio "${tournament.title}"?`,
+        onConfirm: () => {
+          unenrollFromTournament(tournament.id)
+          unenrollTeamFromTournament(tournament.id, user.id)
+          alert('Inscrição cancelada com sucesso!')
+        }
+      })
     } else {
       const success = enrollTeamInTournament(tournament.id, user.id)
       if (success) {
         enrollInTournament(tournament.id)
+        alert(`🎉 Parabéns! Você se inscreveu com sucesso no torneio "${tournament.title}"!\n\nVocê pode acompanhar suas inscrições na página "Minhas Inscrições".`)
+      } else {
+        alert('Erro ao processar a inscrição. Verifique se ainda há vagas disponíveis.')
       }
     }
   }
@@ -74,7 +103,7 @@ const TournamentDetails = () => {
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-1">
                   <FaCalendarAlt />
-                  <span>{new Date(tournament.date).toLocaleDateString('pt-BR')}</span>
+                  <span>{formatDateBR(tournament.date)}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <FaMapMarkerAlt />
@@ -104,7 +133,7 @@ const TournamentDetails = () => {
                 <div className="space-y-3">
                   <div>
                     <span className="font-medium text-gray-700">Data do Torneio:</span>
-                    <div className="text-gray-600">{new Date(tournament.date).toLocaleDateString('pt-BR')}</div>
+                    <div className="text-gray-600">{formatDateBR(tournament.date)}</div>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Local:</span>
@@ -112,7 +141,7 @@ const TournamentDetails = () => {
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Prazo de Inscrição:</span>
-                    <div className="text-gray-600">{new Date(tournament.registrationDeadline).toLocaleDateString('pt-BR')}</div>
+                    <div className="text-gray-600">{formatDateBR(tournament.registrationDeadline)}</div>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -164,7 +193,7 @@ const TournamentDetails = () => {
                       As inscrições para este torneio estão fechadas.
                     </p>
                   </div>
-                  {tournament.status === 'completed' && (
+                  {isTournamentFinished(tournament) && (
                     <Button variant="outline" asChild className="w-full">
                       <Link to={`/chaveamento/${tournament.id}`}>Ver Chaveamento</Link>
                     </Button>
@@ -202,7 +231,7 @@ const TournamentDetails = () => {
                 Entre em contato conosco para esclarecer qualquer dúvida sobre o torneio.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="mailto:contato@copa-pab.com" className="flex items-center gap-2 justify-center">
+                <a href="mailto:gabrielciriaco123@gmail.com" className="flex items-center gap-2 justify-center">
                   <FaEnvelope />
                   Entrar em Contato
                 </a>
@@ -236,6 +265,13 @@ const TournamentDetails = () => {
       </div>
 
       <Footer />
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

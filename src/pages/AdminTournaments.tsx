@@ -17,7 +17,9 @@ import {
   FaRandom,
   FaGlobe
 } from 'react-icons/fa'
+  import { formatDateBR } from '@/utils/timeUtils'
 import { Link } from 'react-router-dom'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface AdminTournament extends Tournament {
   bracket?: Bracket
@@ -104,10 +106,30 @@ const AdminTournaments = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este torneio? Esta ação não pode ser desfeita.')) {
-      deleteTournament(id)
-    }
+    // Abrir modal de confirmação para exclusão
+    openConfirm({
+      title: 'Excluir Torneio',
+      message: 'Tem certeza que deseja excluir este torneio? Esta ação não pode ser desfeita.',
+      onConfirm: () => deleteTournament(id)
+    })
   }
+
+  // Estado para o modal de confirmação reutilizável
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>(undefined)
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
+  }
+
 
   const generateBracket = (tournament: Tournament) => {
     // Para demonstração, vamos criar times fictícios
@@ -136,9 +158,19 @@ const AdminTournaments = () => {
   }
 
   const togglePublic = (tournament: Tournament) => {
-    updateTournament(tournament.id, {
-      isPublic: !tournament.isPublic
-    })
+    // Se estamos tornando público, abrir modal de confirmação e garantir que o status seja 'published'
+    if (!tournament.isPublic) {
+      openConfirm({
+        title: 'Publicar Torneio',
+        message: 'Deseja publicar este torneio e torná-lo visível ao público?\n\nAo confirmar, o torneio será definido como "Publicado" e ficará disponível para todos.',
+        onConfirm: () => updateTournament(tournament.id, { isPublic: true, status: 'published' })
+      })
+    } else {
+      // Tornando privado: apenas alterna o isPublic, mantemos o status atual
+      updateTournament(tournament.id, {
+        isPublic: false
+      })
+    }
   }
   const handleUpdateMatch = (matchId: string, _winner: Team, score?: { teamA: number, teamB: number }) => {
     if (!showBracket?.bracket) return
@@ -210,19 +242,27 @@ const AdminTournaments = () => {
               </h1>
             </div>
             
-            <Button 
-              onClick={() => togglePublic(showBracket)}
-              variant={showBracket.isPublic ? "default" : "outline"}
-              className="flex items-center gap-2"
-            >
-              <FaGlobe />
-              {showBracket.isPublic ? 'Público' : 'Privado'}
-            </Button>
+              <Button 
+                onClick={() => togglePublic(showBracket)}
+                variant={showBracket.isPublic ? "default" : "outline"}
+                className="flex items-center gap-2"
+              >
+                <FaGlobe />
+                {showBracket.isPublic ? 'Público' : 'Privado'}
+              </Button>
           </div>          <BracketViewer 
             bracket={showBracket.bracket!}
             onUpdateMatch={handleUpdateMatch}
             editable={true}
           />
+            {/* Confirm modal for actions */}
+            <ConfirmModal
+              open={confirmOpen}
+              title={confirmTitle}
+              message={confirmMessage}
+              onConfirm={confirmAction}
+              onCancel={() => setConfirmOpen(false)}
+            />
         </div>
       </div>
     )
@@ -401,7 +441,7 @@ const AdminTournaments = () => {
                   <div className="flex items-center gap-6 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <FaCalendarAlt />
-                      <span>{new Date(tournament.date).toLocaleDateString('pt-BR')}</span>
+                      <span>{formatDateBR(tournament.date)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <FaUsers />
@@ -411,6 +451,12 @@ const AdminTournaments = () => {
                       <FaFlag />
                       <span>{tournament.location}</span>
                     </div>
+                    {tournament.winner && (
+                      <div className="flex items-center gap-1">
+                        <FaTrophy className="text-hot-pink" />
+                        <span>{tournament.winner}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -463,6 +509,14 @@ const AdminTournaments = () => {
           )}
         </div>
       </div>
+      {/* Confirm modal for actions */}
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

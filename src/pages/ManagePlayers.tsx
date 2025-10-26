@@ -8,6 +8,7 @@ import Footer from '@/components/Footer'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import PhotoUploader from '@/components/PhotoUploader'
 import DocumentTester from '@/components/DocumentTester'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { FaUsers, FaUser, FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaPhone, FaMedkit, FaIdCard, FaCamera, FaFlask } from 'react-icons/fa'
 
 const ManagePlayers = () => {
@@ -38,6 +39,22 @@ const ManagePlayers = () => {
     'Meia',
     'Atacante'
   ]
+
+  // Modal de confirmação para ações (ex: remover jogadora)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
+  }
 
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setNewPlayer(prev => ({
@@ -138,9 +155,15 @@ const ManagePlayers = () => {
 
   const handleDeletePlayer = (playerId: string) => {
     const player = players.find(p => p.id === playerId)
-    if (player && confirm(`Tem certeza que deseja remover ${player.name} do time?`)) {
-      removePlayer(playerId)
-      alert('Jogadora removida do time!')
+    if (player) {
+      openConfirm({
+        title: 'Remover Jogadora',
+        message: `Tem certeza que deseja remover ${player.name} do time?`,
+        onConfirm: () => {
+          removePlayer(playerId)
+          alert('Jogadora removida do time!')
+        }
+      })
     }
   }
 
@@ -525,6 +548,13 @@ const ManagePlayers = () => {
         {showDocumentTester && (
           <DocumentTester onClose={() => setShowDocumentTester(false)} />
         )}
+        <ConfirmModal
+          open={confirmOpen}
+          title={confirmTitle}
+          message={confirmMessage}
+          onConfirm={confirmAction}
+          onCancel={() => setConfirmOpen(false)}
+        />
       </div>
     </ProtectedRoute>
   )

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 import { FaUser, FaSignOutAlt } from 'react-icons/fa'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useState } from 'react'
 
 interface AuthHeaderProps {
   showBackButton?: boolean
@@ -17,9 +19,26 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
   const { user, isLoggedIn, logout } = useAuth()
 
   const handleLogout = () => {
-    if (confirm('Tem certeza que deseja sair?')) {
-      logout()
-    }
+    openConfirm({
+      message: 'Tem certeza que deseja sair?',
+      onConfirm: () => logout()
+    })
+  }
+
+  // Modal state
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   return (
@@ -67,6 +86,15 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
           </div>
         </div>
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

@@ -18,7 +18,9 @@ import {
   FaRandom,
   FaGlobe
 } from 'react-icons/fa'
+import { formatDateBR } from '@/utils/timeUtils'
 import { Link } from 'react-router-dom'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface AdminTournament extends Tournament {
   bracket?: Bracket
@@ -105,9 +107,27 @@ const AdminTournaments = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este torneio? Esta ação não pode ser desfeita.')) {
-      deleteTournament(id)
-    }
+    openConfirm({
+      title: 'Excluir Torneio',
+      message: 'Tem certeza que deseja excluir este torneio? Esta ação não pode ser desfeita.',
+      onConfirm: () => deleteTournament(id)
+    })
+  }
+
+  // Modal state/helper
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmTitle, setConfirmTitle] = useState<string | undefined>()
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {})
+
+  const openConfirm = ({ title, message, onConfirm }: { title?: string; message: string; onConfirm: () => void }) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmAction(() => () => {
+      onConfirm()
+      setConfirmOpen(false)
+    })
+    setConfirmOpen(true)
   }
 
   const generateBracket = (tournament: Tournament) => {
@@ -142,7 +162,7 @@ const AdminTournaments = () => {
     })
   }
 
-  const handleUpdateMatch = (tournamentId: string, matchId: string, winner: Team, score?: { teamA: number, teamB: number }) => {
+  const handleUpdateMatch = (matchId: string, _winner: Team, score?: { teamA: number, teamB: number }) => {
     if (!showBracket?.bracket) return
 
     try {
@@ -225,7 +245,7 @@ const AdminTournaments = () => {
           <BracketViewer 
             bracket={showBracket.bracket!}
             onUpdateMatch={handleUpdateMatch}
-            isAdmin={true}
+            editable={true}
           />
         </div>
       </div>
@@ -405,7 +425,7 @@ const AdminTournaments = () => {
                   <div className="flex items-center gap-6 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <FaCalendarAlt />
-                      <span>{new Date(tournament.date).toLocaleDateString('pt-BR')}</span>
+                      <span>{formatDateBR(tournament.date)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <FaUsers />
@@ -467,6 +487,13 @@ const AdminTournaments = () => {
           )}
         </div>
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={confirmAction}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

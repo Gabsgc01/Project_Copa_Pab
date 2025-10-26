@@ -7,6 +7,7 @@ import NavigationHeader from '@/components/NavigationHeader'
 import Footer from '@/components/Footer'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { FaUser, FaEdit, FaSave, FaTimes, FaUsers, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendar, FaShieldAlt } from 'react-icons/fa'
+import { formatDateBR } from '@/utils/timeUtils'
 
 const Profile = () => {
   const { user, updateUser } = useAuth()
@@ -115,7 +116,7 @@ const Profile = () => {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-800">{user.teamName}</h1>
                   <p className="text-gray-600">Responsável: {user.responsibleName}</p>
-                  <p className="text-sm text-gray-500">Membro desde {new Date(user.registrationDate).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-sm text-gray-500">Membro desde {formatDateBR(user.registrationDate)}</p>
                 </div>
               </div>
               

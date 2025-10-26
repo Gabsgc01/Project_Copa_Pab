@@ -7,6 +7,7 @@ import NavigationHeader from '@/components/NavigationHeader'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTournaments } from '@/contexts/TournamentContext'
+import { formatDateBR } from '@/utils/timeUtils'
 import { useState } from 'react'
 
 const UpcomingTournaments = () => {
@@ -17,8 +18,8 @@ const UpcomingTournaments = () => {
   // Usar torneios do contexto
   const tournaments = getPublicTournaments().map(tournament => ({
     ...tournament,
-    date: new Date(tournament.date).toLocaleDateString('pt-BR'),
-    registrationDeadline: new Date(tournament.registrationDeadline).toLocaleDateString('pt-BR')
+    date: formatDateBR(tournament.date),
+    registrationDeadline: formatDateBR(tournament.registrationDeadline)
   }))
 
   const filteredTournaments = tournaments.filter(tournament =>
@@ -120,12 +121,12 @@ const UpcomingTournaments = () => {
             Fique por dentro das novidades! Siga nossas redes sociais e seja a primeira a saber sobre novos torneios e competições.
           </p>          <div className="flex justify-center gap-4">
             <Button variant="default" asChild>
-              <a href="mailto:contato@copa-pab.com">
+              <a href="mailto:gabrielciriaco123@gmail.com">
                 Entre em Contato
               </a>
             </Button>
             <Button variant="outline" asChild>
-              <a href="mailto:contato@copa-pab.com?subject=Newsletter Copa PAB">
+              <a href="mailto:gabrielciriaco123@gmail.com?subject=Newsletter Copa PAB">
                 Newsletter
               </a>
             </Button>

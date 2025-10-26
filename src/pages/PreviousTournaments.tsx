@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FaCalendarAlt, FaMapMarkerAlt, FaTrophy, FaArrowLeft } from 'react-icons/fa'
+import { formatDateBR } from '@/utils/timeUtils'
 import { Button } from '@/components/ui/button'
 import NavigationHeader from '@/components/NavigationHeader'
 import Footer from '@/components/Footer'
@@ -50,7 +51,7 @@ const PreviousTournaments = () => {
                     <h3 className="text-xl font-bold mb-1">{tournament.title}</h3>
                     <div className="flex items-center gap-2 text-sm">
                       <FaCalendarAlt />
-                      <span>{new Date(tournament.date).toLocaleDateString('pt-BR')}</span>
+                      <span>{formatDateBR(tournament.date)}</span>
                     </div>
                   </div>
                   <div className="absolute top-4 right-4">
@@ -65,6 +66,11 @@ const PreviousTournaments = () => {
                   <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                     {tournament.description}
                   </p>
+                  {tournament.winner && (
+                    <div className="mb-4">
+                      <span className="inline-block bg-hot-pink/10 text-hot-pink px-3 py-1 rounded-full text-sm font-semibold">Campeãs: {tournament.winner}</span>
+                    </div>
+                  )}
                   
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-700">

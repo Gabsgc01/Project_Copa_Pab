@@ -5,10 +5,11 @@ export interface MaskedInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   mask?: 'phone' | 'email' | 'number' | 'text'
   maxLength?: number
+  disableTrim?: boolean
 }
 
 const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ className, type, mask, maxLength, onChange, value, ...props }, ref) => {
+  ({ className, type, mask, maxLength, onChange, value, disableTrim = true, ...props }, ref) => {
       const formatPhone = (value: string) => {
       // Remove todos os caracteres não numéricos
       const numbers = value.replace(/\D/g, '')
@@ -36,7 +37,7 @@ const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      let formattedValue = e.target.value.trim()
+      let formattedValue = disableTrim ? e.target.value : e.target.value.trim()
 
       switch (mask) {
         case 'phone':
@@ -49,10 +50,10 @@ const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
           formattedValue = formatNumber(formattedValue)
           break
         case 'text':
-          formattedValue = formattedValue.trim()
+          formattedValue = disableTrim ? formattedValue : formattedValue.trim()
           break
         default:
-          formattedValue = formattedValue.trim()
+          formattedValue = disableTrim ? formattedValue : formattedValue.trim()
       }
 
       if (maxLength && formattedValue.length > maxLength) {

@@ -7,21 +7,31 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, onChange, disableTrim = false, ...props }, ref) => {
+  ({ className, type, onChange, onBlur, disableTrim = true, ...props }, ref) => {
+    // Não remover espaços automaticamente enquanto o usuário digita.
+    // Se o desenvolvedor quiser que o campo seja "trimado", mantenha disableTrim={false} —
+    // nesse caso aplicamos o trim apenas no onBlur para evitar comportamento estranho ao digitar.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange?.(e)
+    }
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Primeiro repassa o onBlur padrão, se houver
+      onBlur?.(e)
+
+      // Se trim estiver habilitado (disableTrim === false), aplicamos trim no blur
       if (!disableTrim && onChange) {
-        // Aplicar trim automaticamente apenas se não for desabilitado
-        const trimmedValue = e.target.value.trim()
+        const trimmedValue = (e.target as HTMLInputElement).value.trim()
         const syntheticEvent = {
+          // Use any para contornar diferença de tipos entre FocusEvent e ChangeEvent
           ...e,
           target: {
-            ...e.target,
+            ...(e.target as HTMLInputElement),
             value: trimmedValue
           }
-        }
+        } as any
+
         onChange(syntheticEvent)
-      } else {
-        onChange?.(e)
       }
     }
 
@@ -34,6 +44,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         onChange={handleChange}
+        onBlur={handleBlur}
         {...props}
       />
     )

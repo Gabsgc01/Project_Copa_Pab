@@ -9,6 +9,8 @@ import TournamentDetails from '@/pages/TournamentDetails'
 import TournamentRegistration from '@/pages/TournamentRegistration'
 import BracketView from '@/pages/BracketView'
 import ManagePlayers from '@/pages/ManagePlayers'
+import MinhasInscricoes from '@/pages/MinhasInscricoes'
+import Historico from '@/pages/Historico'
 import BracketDemo from '@/pages/BracketDemo'
 import AdminLogin from '@/pages/AdminLogin'
 import AdminDashboard from '@/pages/AdminDashboard'
@@ -63,11 +65,26 @@ const router = createBrowserRouter([
     {
         path: "/inscricao/:id",
         element: <TournamentRegistration />,
-    },
-    {
+    },    {
         path: "/jogadoras",
         element: <ManagePlayers />,
+    },
+    {
+        path: "/minhas-inscricoes",
+        element: (
+            <ProtectedRoute>
+                <MinhasInscricoes />
+            </ProtectedRoute>
+        ),
     },    {
+        path: "/historico",
+        element: (
+            <ProtectedRoute>
+                <Historico />
+            </ProtectedRoute>
+        ),
+    },
+    {
         path: "/chaveamento",
         element: (
             <ProtectedRoute>

@@ -1,7 +1,8 @@
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import { FaCalendarAlt, FaMapMarkerAlt, FaTrophy, FaUsers, FaClock, FaLock } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaTrophy, FaUsers, FaClock, FaLock, FaCheck } from "react-icons/fa";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTournaments } from "@/contexts/TournamentContext";
 
 interface CardUpcomingTournamentProps {
     id: string;
@@ -30,9 +31,23 @@ export default function CardUpcomingTournament({
     imageUrl,
     isRegistrationOpen
 }: CardUpcomingTournamentProps) {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, user, enrollInTournament, getEnrolledTournaments } = useAuth();
+    const { enrollTeamInTournament } = useTournaments();
     const spotsLeft = maxTeams - registeredTeams;
     const isAlmostFull = spotsLeft <= 5;
+    const isEnrolled = getEnrolledTournaments().includes(id);
+
+    const handleQuickEnrollment = () => {
+        if (!user) return;
+        
+        const success = enrollTeamInTournament(id, user.id);
+        if (success) {
+            enrollInTournament(id);
+            alert(`🎉 Parabéns! Você se inscreveu com sucesso no torneio "${title}"!\n\nVocê pode acompanhar suas inscrições na página "Minhas Inscrições".`);
+        } else {
+            alert('Erro ao processar a inscrição. Verifique se ainda há vagas disponíveis.');
+        }
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-hot-pink transition-colors duration-300">
@@ -94,19 +109,27 @@ export default function CardUpcomingTournament({
                     </div>
                 </div>
                 
-                <div className="flex gap-3">
-                    {isRegistrationOpen ? (
+                <div className="flex gap-3">                    {isRegistrationOpen ? (
                         isLoggedIn ? (
-                            <Button 
-                                className="flex-1 font-bold" 
-                                variant="default"
-                                asChild
-                                disabled={spotsLeft === 0}
-                            >
-                                <Link to={`/inscricao/${id}`}>
-                                    {spotsLeft === 0 ? 'Esgotado' : 'Inscrever-se'}
-                                </Link>
-                            </Button>
+                            isEnrolled ? (
+                                <Button 
+                                    className="flex-1 font-bold bg-green-600 hover:bg-green-700" 
+                                    variant="default"
+                                    disabled
+                                >
+                                    <FaCheck className="mr-2" />
+                                    Já Inscrito
+                                </Button>
+                            ) : (
+                                <Button 
+                                    className="flex-1 font-bold" 
+                                    variant="default"
+                                    onClick={handleQuickEnrollment}
+                                    disabled={spotsLeft === 0}
+                                >
+                                    {spotsLeft === 0 ? 'Esgotado' : 'Inscrever-se Agora'}
+                                </Button>
+                            )
                         ) : (
                             <Button 
                                 className="flex-1 font-bold" 

@@ -1,47 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
-import { FaUsers, FaTrophy, FaChartBar, FaCog, FaShieldAlt, FaCalendarAlt, FaFileAlt } from 'react-icons/fa'
+import { FaUsers, FaTrophy, FaCog, FaShieldAlt, FaFileAlt } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
+import DashboardStatsCard from '@/components/DashboardStatsCard'
+import DataManagementPanel from '@/components/DataManagementPanel'
 
 const AdminDashboard = () => {
   const { user, getAllUsers } = useAuth()
   const allUsers = getAllUsers()
-
-  // Estatísticas básicas
-  const totalUsers = allUsers.length
-  const totalPlayers = allUsers.reduce((sum, user) => sum + (user.players?.length || 0), 0)
-  const usersWithPlayers = allUsers.filter(user => (user.players?.length || 0) > 0).length
-
-  const stats = [
-    {
-      title: 'Times Cadastrados',
-      value: totalUsers,
-      icon: FaUsers,
-      color: 'bg-blue-500',
-      description: 'Total de times registrados'
-    },
-    {
-      title: 'Jogadoras Cadastradas',
-      value: totalPlayers,
-      icon: FaTrophy,
-      color: 'bg-green-500',
-      description: 'Total de atletas no sistema'
-    },
-    {
-      title: 'Times Ativos',
-      value: usersWithPlayers,
-      color: 'bg-purple-500',
-      icon: FaChartBar,
-      description: 'Times com jogadoras cadastradas'
-    },
-    {
-      title: 'Torneios Ativos',
-      value: 0, // Será implementado quando houver sistema de torneios
-      color: 'bg-hot-pink',
-      icon: FaCalendarAlt,
-      description: 'Torneios em andamento'
-    }
-  ]
 
   const quickActions = [
     {
@@ -102,22 +68,7 @@ const AdminDashboard = () => {
         {/* Estatísticas */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Visão Geral</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
-                  </div>
-                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                    <stat.icon className="text-white text-xl" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <DashboardStatsCard />
         </div>
 
         {/* Ações Rápidas */}
@@ -213,6 +164,11 @@ const AdminDashboard = () => {
               Chaveamentos
             </Button>
           </Link>
+        </div>
+
+        {/* Painel de Gerenciamento de Dados */}
+        <div className="mt-8">
+          <DataManagementPanel />
         </div>
       </div>
     </div>

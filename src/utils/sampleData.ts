@@ -14,7 +14,8 @@ export interface Player {
 
 export interface Team {
   id: string
-  name: string
+  teamName: string
+  responsibleName: string
   email: string
   password: string
   phone: string
@@ -28,6 +29,7 @@ export interface Team {
   logo?: string
   players: Player[]
   createdAt: string
+  registrationDate: string
   role?: 'user'
   enrolledTournaments?: string[]
 }
@@ -143,7 +145,8 @@ const samplePlayers: Player[] = [
 export const sampleTeams: Team[] = [
   {
     id: 'team_1',
-    name: 'Estrelas do Futebol',
+    teamName: 'Estrelas do Futebol',
+    responsibleName: 'Maria Silva',
     email: 'estrelas@email.com',
     password: 'senha123',
     phone: '(11) 99999-1111',
@@ -156,12 +159,14 @@ export const sampleTeams: Team[] = [
     description: 'Time fundado em 2018 com foco no desenvolvimento do futebol feminino em São Paulo.',
     players: samplePlayers.slice(0, 11),
     createdAt: '2024-01-15T10:00:00.000Z',
+    registrationDate: '2024-01-15T10:00:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_1', 'tournament_2']
   },
   {
     id: 'team_2',
-    name: 'Força Feminina',
+    teamName: 'Força Feminina',
+    responsibleName: 'Isabela Barbosa',
     email: 'forca@email.com',
     password: 'senha123',
     phone: '(21) 99999-2222',
@@ -174,12 +179,14 @@ export const sampleTeams: Team[] = [
     description: 'Equipe carioca dedicada à formação de atletas e promoção do esporte feminino.',
     players: samplePlayers.slice(11, 22),
     createdAt: '2024-01-20T14:30:00.000Z',
+    registrationDate: '2024-01-20T14:30:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_1']
   },
   {
     id: 'team_3',
-    name: 'Guerreiras FC',
+    teamName: 'Guerreiras FC',
+    responsibleName: 'Bruna Araújo',
     email: 'guerreiras@email.com',
     password: 'senha123',
     phone: '(31) 99999-3333',
@@ -192,12 +199,14 @@ export const sampleTeams: Team[] = [
     description: 'Time mineiro com tradição no futebol feminino regional.',
     players: samplePlayers.slice(22, 33),
     createdAt: '2024-02-01T09:15:00.000Z',
+    registrationDate: '2024-02-01T09:15:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_2']
   },
   {
     id: 'team_4',
-    name: 'Amazonas United',
+    teamName: 'Amazonas United',
+    responsibleName: 'Tatiana Machado',
     email: 'amazonas@email.com',
     password: 'senha123',
     phone: '(92) 99999-4444',
@@ -210,12 +219,14 @@ export const sampleTeams: Team[] = [
     description: 'Representando a força do futebol feminino amazônico.',
     players: samplePlayers.slice(33, 44),
     createdAt: '2024-02-10T16:45:00.000Z',
+    registrationDate: '2024-02-10T16:45:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_1', 'tournament_3']
   },
   {
     id: 'team_5',
-    name: 'Panteras do Sul',
+    teamName: 'Panteras do Sul',
+    responsibleName: 'Michele Brandão',
     email: 'panteras@email.com',
     password: 'senha123',
     phone: '(51) 99999-5555',
@@ -228,12 +239,14 @@ export const sampleTeams: Team[] = [
     description: 'Time gaúcho conhecido pela garra e determinação em campo.',
     players: samplePlayers.slice(44, 55),
     createdAt: '2024-02-15T11:20:00.000Z',
+    registrationDate: '2024-02-15T11:20:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_2', 'tournament_3']
   },
   {
     id: 'team_6',
-    name: 'Águias Douradas',
+    teamName: 'Águias Douradas',
+    responsibleName: 'Luciene Tavares',
     email: 'aguias@email.com',
     password: 'senha123',
     phone: '(85) 99999-6666',
@@ -246,12 +259,14 @@ export const sampleTeams: Team[] = [
     description: 'Jovem equipe nordestina em ascensão no cenário nacional.',
     players: samplePlayers.slice(55, 66),
     createdAt: '2024-03-01T08:00:00.000Z',
+    registrationDate: '2024-03-01T08:00:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_3']
   },
   {
     id: 'team_7',
-    name: 'Tigres do Norte',
+    teamName: 'Tigres do Norte',
+    responsibleName: 'Francisca Medeiros',
     email: 'tigres@email.com',
     password: 'senha123',
     phone: '(84) 99999-7777',
@@ -264,12 +279,14 @@ export const sampleTeams: Team[] = [
     description: 'Equipe potiguar com foco na revelação de novos talentos.',
     players: samplePlayers.slice(66, 77),
     createdAt: '2024-03-05T13:30:00.000Z',
+    registrationDate: '2024-03-05T13:30:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_1']
   },
   {
     id: 'team_8',
-    name: 'Dragões Vermelhos',
+    teamName: 'Dragões Vermelhos',
+    responsibleName: 'Marlene Cortês',
     email: 'dragoes@email.com',
     password: 'senha123',
     phone: '(62) 99999-8888',
@@ -282,6 +299,7 @@ export const sampleTeams: Team[] = [
     description: 'Time goiano com história consolidada no futebol feminino do Centro-Oeste.',
     players: samplePlayers.slice(77, 88),
     createdAt: '2024-03-10T15:45:00.000Z',
+    registrationDate: '2024-03-10T15:45:00.000Z',
     role: 'user',
     enrolledTournaments: ['tournament_2']
   }
@@ -379,23 +397,12 @@ export const sampleTournaments: Tournament[] = [
 
 // Função para popular o localStorage
 export const populateLocalStorage = () => {
-  // Verificar se já existem dados para não sobrescrever
-  const existingUsers = localStorage.getItem('users')
-  const existingTournaments = localStorage.getItem('tournaments')
+  // Forçar atualização dos dados para corrigir problemas de estrutura
+  localStorage.setItem('users', JSON.stringify(sampleTeams))
+  console.log('✅ Times de exemplo atualizados no localStorage')
   
-  if (!existingUsers || JSON.parse(existingUsers).length === 0) {
-    localStorage.setItem('users', JSON.stringify(sampleTeams))
-    console.log('✅ Times de exemplo adicionados ao localStorage')
-  } else {
-    console.log('ℹ️ Times já existem no localStorage')
-  }
-  
-  if (!existingTournaments || JSON.parse(existingTournaments).length === 0) {
-    localStorage.setItem('tournaments', JSON.stringify(sampleTournaments))
-    console.log('✅ Torneios de exemplo adicionados ao localStorage')
-  } else {
-    console.log('ℹ️ Torneios já existem no localStorage')
-  }
+  localStorage.setItem('tournaments', JSON.stringify(sampleTournaments))
+  console.log('✅ Torneios de exemplo atualizados no localStorage')
   
   // Adicionar estatísticas gerais para o dashboard
   const dashboardStats = {

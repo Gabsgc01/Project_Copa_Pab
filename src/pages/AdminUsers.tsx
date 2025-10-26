@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import ConfirmModal from '@/components/ui/ConfirmModal'
 import { useAuth } from '@/contexts/AuthContext'
+import { getSafeInitial, getSafeTeamName, getSafeResponsibleName, isValidUser, getSafeDate } from '../utils/safeUtils'
 import { Button } from '@/components/ui/button'
 import { 
   FaUsers, 
@@ -61,10 +62,10 @@ const AdminUsers = () => {
   // Filtros
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
-      user.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.responsibleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.city.toLowerCase().includes(searchTerm.toLowerCase())
+      getSafeTeamName(user).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getSafeResponsibleName(user).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.city || '').toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesCity = !filterCity || user.city === filterCity
     
@@ -76,7 +77,7 @@ const AdminUsers = () => {
   const handleDeleteUser = (user: User) => {
     openConfirm({
       title: 'Excluir Time',
-      message: `Tem certeza que deseja excluir o time "${user.teamName}"? Esta ação não pode ser desfeita.`,
+      message: `Tem certeza que deseja excluir o time "${getSafeTeamName(user)}"? Esta ação não pode ser desfeita.`,
       onConfirm: () => {
         deleteUser(user.id)
         loadUsers()
@@ -127,12 +128,12 @@ const AdminUsers = () => {
     const csvContent = [
       ['Time', 'Responsável', 'Email', 'Telefone', 'Cidade', 'Data Cadastro', 'Jogadoras'],
       ...users.map(user => [
-        user.teamName,
-        user.responsibleName,
+        getSafeTeamName(user),
+        getSafeResponsibleName(user),
         user.email,
         user.phone,
         user.city,
-        user.registrationDate,
+        getSafeDate(user.registrationDate),
         user.players?.length || 0
       ])
     ].map(row => row.join(',')).join('\n')
@@ -416,23 +417,23 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
+                {filteredUsers.filter(isValidUser).map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-gradient-to-br from-hot-pink to-pink-light rounded-full flex items-center justify-center mr-3">
                           <span className="text-white font-bold text-sm">
-                            {user.teamName.charAt(0).toUpperCase()}
+                            {getSafeInitial(getSafeTeamName(user))}
                           </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{user.teamName}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="text-sm font-medium text-gray-900">{getSafeTeamName(user)}</div>
+                          <div className="text-sm text-gray-500">{user.email || 'Email não informado'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.responsibleName}</div>
+                      <div className="text-sm text-gray-900">{getSafeResponsibleName(user)}</div>
                       <div className="text-sm text-gray-500">{user.phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

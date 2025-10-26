@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { FaUsers, FaTrophy, FaCog, FaShieldAlt, FaFileAlt } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import DashboardStatsCard from '@/components/DashboardStatsCard'
-import DataManagementPanel from '@/components/DataManagementPanel'
+import { getSafeInitial, getSafeTeamName, getSafeResponsibleName, isValidUser, getSafeDate } from '@/utils/safeUtils'
 
 const AdminDashboard = () => {
   const { user, getAllUsers } = useAuth()
@@ -111,24 +111,24 @@ const AdminDashboard = () => {
           <div className="p-6">
             {allUsers.length > 0 ? (
               <div className="space-y-4">
-                {allUsers.slice(0, 5).map((user) => (
+                {allUsers.slice(0, 5).filter(isValidUser).map((user) => (
                   <div key={user.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gradient-to-br from-hot-pink to-pink-light rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-sm">
-                          {user.teamName.charAt(0).toUpperCase()}
+                          {getSafeInitial(getSafeTeamName(user))}
                         </span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">{user.teamName}</h4>
-                        <p className="text-sm text-gray-600">{user.responsibleName} • {user.city}</p>
+                        <h4 className="font-medium text-gray-900">{getSafeTeamName(user)}</h4>
+                        <p className="text-sm text-gray-600">{getSafeResponsibleName(user)} • {user.city || 'Cidade não informada'}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
                         {user.players?.length || 0} jogadoras
                       </p>
-                      <p className="text-xs text-gray-500">{user.registrationDate}</p>
+                      <p className="text-xs text-gray-500">{getSafeDate(user.registrationDate || user.createdAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -164,11 +164,6 @@ const AdminDashboard = () => {
               Chaveamentos
             </Button>
           </Link>
-        </div>
-
-        {/* Painel de Gerenciamento de Dados */}
-        <div className="mt-8">
-          <DataManagementPanel />
         </div>
       </div>
     </div>

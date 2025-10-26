@@ -4,16 +4,25 @@ import { populateLocalStorage } from '@/utils/sampleData'
 // Componente para inicializar dados de exemplo
 const DataInitializer = () => {
   useEffect(() => {
-    // Executar apenas uma vez quando o app carrega
-    const hasInitialized = localStorage.getItem('dataInitialized')
+    // Forçar atualização para corrigir problemas de estrutura de dados
+    const currentVersion = '2.0' // Incrementar esta versão quando houver mudanças estruturais
+    const lastVersion = localStorage.getItem('dataVersion')
     
-    if (!hasInitialized) {
-      console.log('🚀 Inicializando dados de exemplo...')
+    if (!lastVersion || lastVersion !== currentVersion) {
+      console.log('🚀 Atualizando estrutura de dados para versão', currentVersion)
+      
+      // Limpar dados antigos que podem ter estrutura incorreta
+      localStorage.removeItem('users')
+      localStorage.removeItem('tournaments')
+      localStorage.removeItem('dashboardStats')
+      
+      // Carregar novos dados com estrutura correta
       populateLocalStorage()
+      localStorage.setItem('dataVersion', currentVersion)
       localStorage.setItem('dataInitialized', 'true')
-      console.log('✅ Dados de exemplo inicializados com sucesso!')
+      console.log('✅ Dados atualizados com sucesso para versão', currentVersion)
     } else {
-      console.log('ℹ️ Dados já foram inicializados anteriormente')
+      console.log('ℹ️ Dados já estão na versão correta:', currentVersion)
     }
   }, [])
 

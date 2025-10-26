@@ -13,6 +13,8 @@ interface DashboardStats {
 const DashboardStatsCard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<any[]>([])
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [updateMessage, setUpdateMessage] = useState('')
 
   useEffect(() => {
     loadStats()
@@ -48,7 +50,7 @@ const DashboardStatsCard = () => {
     const allItems = [
       ...users.map((user: any) => ({
         type: 'team',
-        name: user.name,
+        name: user.teamName || user.name || 'Time',
         date: user.createdAt,
         icon: FaUsers
       })),
@@ -61,6 +63,38 @@ const DashboardStatsCard = () => {
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     
     setRecentActivity(allItems.slice(0, 5))
+  }
+
+  const handleUpdateStats = async () => {
+    setIsUpdating(true)
+    setUpdateMessage('')
+    
+    try {
+      // Simular um pequeno delay para mostrar o loading
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // Recarregar os dados
+      loadStats()
+      loadRecentActivity()
+      
+      // Mostrar mensagem de sucesso
+      setUpdateMessage('✅ Estatísticas atualizadas com sucesso!')
+      
+      // Remover mensagem após 3 segundos
+      setTimeout(() => {
+        setUpdateMessage('')
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Erro ao atualizar estatísticas:', error)
+      setUpdateMessage('❌ Erro ao atualizar estatísticas')
+      
+      setTimeout(() => {
+        setUpdateMessage('')
+      }, 3000)
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -155,25 +189,25 @@ const DashboardStatsCard = () => {
         </div>
       </div>
 
-      {/* Informações Adicionais */}
-      <div className="bg-gradient-to-r from-hot-pink to-pink-light rounded-lg shadow-md p-6 text-white">
-        <h3 className="text-lg font-semibold mb-2">💡 Dica do Administrador</h3>
-        <p className="text-sm opacity-90">
-          Use as ferramentas do console para gerenciar dados de exemplo. Digite <code className="bg-white bg-opacity-20 px-2 py-1 rounded">window.showStats()</code> no console para ver estatísticas detalhadas.
-        </p>
-      </div>
-
       {/* Botão para Recarregar Dados */}
       <div className="text-center">
         <button
-          onClick={() => {
-            loadStats()
-            loadRecentActivity()
-          }}
-          className="bg-hot-pink text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition-colors"
+          onClick={handleUpdateStats}
+          disabled={isUpdating}
+          className={`px-6 py-2 rounded-lg transition-colors ${
+            isUpdating 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-hot-pink hover:bg-pink-600'
+          } text-white`}
         >
-          🔄 Atualizar Estatísticas
+          {isUpdating ? '🔄 Atualizando...' : '🔄 Atualizar Estatísticas'}
         </button>
+        
+        {updateMessage && (
+          <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded-lg">
+            <p className="text-green-800 text-sm font-medium">{updateMessage}</p>
+          </div>
+        )}
       </div>
     </div>
   )

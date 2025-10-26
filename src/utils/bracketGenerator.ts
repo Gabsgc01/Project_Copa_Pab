@@ -90,7 +90,8 @@ export class BracketGenerator {
 
     // Primeira rodada - Oitavas, quartas, etc.
     const firstRoundMatches = bracketSize / 2
-    const byes = bracketSize - teams.length // Times que passam direto
+    // Calculate byes for future use if needed
+    // const byes = bracketSize - teams.length // Times que passam direto
 
     let teamIndex = 0
     

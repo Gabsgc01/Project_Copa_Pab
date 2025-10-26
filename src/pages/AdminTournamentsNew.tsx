@@ -10,7 +10,6 @@ import {
   FaPlus, 
   FaEdit, 
   FaTrash, 
-  FaEye, 
   FaCalendarAlt, 
   FaUsers, 
   FaFlag, 

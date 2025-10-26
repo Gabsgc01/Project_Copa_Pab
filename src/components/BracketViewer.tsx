@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { BracketGenerator, type Bracket, type Match, type Team } from '../utils/bracketGenerator'
-import { FaTrophy, FaPlay, FaUsers, FaCalendarAlt, FaCrown, FaPlus, FaTrash, FaEdit } from 'react-icons/fa'
+import { FaTrophy, FaUsers, FaCrown, FaPlus, FaTrash, FaEdit } from 'react-icons/fa'
 
 interface BracketViewerProps {
   bracket: Bracket

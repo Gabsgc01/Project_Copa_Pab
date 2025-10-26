@@ -31,15 +31,16 @@ interface User {
   enrolledTournaments?: string[] // IDs dos torneios inscritos
 }
 
-interface AdminUser {
-  id: string
-  username: string
-  password: string
-  role: 'admin'
-  name: string
-  email: string
-  createdAt: string
-}
+// Unused interface - commented out to avoid TypeScript warning
+// interface AdminUser {
+//   id: string
+//   username: string
+//   password: string
+//   role: 'admin'
+//   name: string
+//   email: string
+//   createdAt: string
+// }
 
 interface AuthContextType {
   user: User | null

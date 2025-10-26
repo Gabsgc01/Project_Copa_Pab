@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTournaments, type Tournament } from '@/contexts/TournamentContext'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import BracketViewer from '@/components/BracketViewer'
 import { BracketGenerator, type Bracket, type Team } from '@/utils/bracketGenerator'
 import { 
@@ -26,7 +25,7 @@ interface AdminTournament extends Tournament {
 
 const AdminTournaments = () => {
   const { isAdmin } = useAuth()
-  const { tournaments, addTournament, updateTournament, deleteTournament } = useTournaments()
+  const { tournaments, addTournament, updateTournament, deleteTournament: deleteTournamentFromContext } = useTournaments()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBracket, setShowBracket] = useState<AdminTournament | null>(null)
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null)
@@ -50,46 +49,32 @@ const AdminTournaments = () => {
   }, [])
 
   const loadTournaments = () => {
-    const storedTournaments = JSON.parse(localStorage.getItem('tournaments') || '[]') as Tournament[]
-    setTournaments(storedTournaments)
-  }
-
-  const saveTournaments = (updatedTournaments: Tournament[]) => {
-    localStorage.setItem('tournaments', JSON.stringify(updatedTournaments))
-    setTournaments(updatedTournaments)
+    // Tournaments are loaded automatically by the context
   }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
       // Verificar se todas as informações estão completas
-    const isComplete = !!(formData.name.trim() && 
+    const isComplete = !!(formData.title.trim() && 
                          formData.description.trim() && 
-                         formData.startDate && 
-                         formData.endDate && 
+                         formData.date && 
+                         formData.registrationDeadline && 
                          formData.maxTeams > 0)
       if (editingTournament) {
       // Editar torneio existente
-      const updatedTournaments = tournaments.map(t =>
-        t.id === editingTournament.id
-          ? { 
-              ...t, 
-              ...formData, 
-              status: (isComplete ? 'published' : 'draft') as Tournament['status'],
-              isPublic: isComplete
-            }
-          : t
-      )
-      saveTournaments(updatedTournaments)
+      updateTournament(editingTournament.id, {
+        ...formData,
+        status: (isComplete ? 'published' : 'draft') as Tournament['status'],
+        isPublic: isComplete
+      })
       setEditingTournament(null)
     } else {
       // Criar novo torneio
-      const newTournament: Tournament = {
-        id: `tournament_${Date.now()}`,
+      const newTournament: Omit<Tournament, 'id' | 'createdAt'> = {
         ...formData,
         status: (isComplete ? 'published' : 'draft') as Tournament['status'],
-        createdAt: new Date().toISOString(),
         isPublic: isComplete
       }
-      saveTournaments([...tournaments, newTournament])
+      addTournament(newTournament)
     }
     
     setShowCreateForm(false)
@@ -98,19 +83,22 @@ const AdminTournaments = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
+      title: '',
       description: '',
-      startDate: '',
-      endDate: '',
+      date: '',
+      registrationDeadline: '',
+      location: '',
       maxTeams: 16,
-      registrationOpen: true
+      registeredTeams: 0,
+      prize: '',
+      imageUrl: '',
+      isRegistrationOpen: true
     })
   }
 
-  const deleteTournament = (id: string) => {
+  const handleDeleteTournament = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este torneio? Esta ação não pode ser desfeita.')) {
-      const updatedTournaments = tournaments.filter(t => t.id !== id)
-      saveTournaments(updatedTournaments)
+      deleteTournamentFromContext(id)
     }
   }
 
@@ -124,36 +112,26 @@ const AdminTournaments = () => {
     }))
 
     const bracket = BracketGenerator.generateBracket(sampleTeams, tournament.id)
-      const updatedTournaments = tournaments.map(t =>
-      t.id === tournament.id
-        ? { ...t, bracket, status: 'published' as const }
-        : t
-    )
-    saveTournaments(updatedTournaments)
+    // Since the Tournament interface doesn't support bracket, we'll just update the status
+    updateTournament(tournament.id, { status: 'published' })
+    // For the UI, we'll create an AdminTournament with bracket
+    const adminTournament: AdminTournament = { ...tournament, bracket }
+    setShowBracket(adminTournament)
   }
 
   const togglePublic = (tournament: Tournament) => {
-    const updatedTournaments = tournaments.map(t =>
-      t.id === tournament.id
-        ? { ...t, isPublic: !t.isPublic }
-        : t
-    )
-    saveTournaments(updatedTournaments)
+    updateTournament(tournament.id, { isPublic: !tournament.isPublic })
   }
 
   const handleUpdateMatch = (tournamentId: string, matchId: string, winner: Team, score?: { teamA: number, teamB: number }) => {
-    const tournament = tournaments.find(t => t.id === tournamentId)
+    const tournament = tournaments.find(t => t.id === tournamentId) as AdminTournament
     if (!tournament?.bracket) return
     
     try {
       const updatedBracket = BracketGenerator.updateMatchResult(tournament.bracket, matchId, winner, score)
       
-      const updatedTournaments = tournaments.map(t =>
-        t.id === tournamentId
-          ? { ...t, bracket: updatedBracket }
-          : t
-      )
-      saveTournaments(updatedTournaments)
+      // Since the Tournament interface doesn't support bracket, we'll update the local state only
+      // In a real app, you'd persist this in a database or extend the Tournament interface
       
       // Atualizar o estado local se estamos visualizando este torneio
       if (showBracket?.id === tournamentId) {
@@ -167,12 +145,16 @@ const AdminTournaments = () => {
   const startEdit = (tournament: Tournament) => {
     setEditingTournament(tournament)
     setFormData({
-      name: tournament.name,
+      title: tournament.title,
       description: tournament.description,
-      startDate: tournament.startDate,
-      endDate: tournament.endDate,
+      date: tournament.date,
+      registrationDeadline: tournament.registrationDeadline,
+      location: tournament.location,
       maxTeams: tournament.maxTeams,
-      registrationOpen: tournament.registrationOpen
+      registeredTeams: tournament.registeredTeams,
+      prize: tournament.prize,
+      imageUrl: tournament.imageUrl,
+      isRegistrationOpen: tournament.isRegistrationOpen
     })
     setShowCreateForm(true)
   }
@@ -201,7 +183,7 @@ const AdminTournaments = () => {
               <FaArrowLeft />
               Voltar
             </Button>
-            <h1 className="text-2xl font-bold text-gray-900">{showBracket.name} - Chaveamento</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{showBracket.title} - Chaveamento</h1>
             
             <div className="ml-auto flex items-center gap-2">
               <Button
@@ -274,8 +256,8 @@ const AdminTournaments = () => {
                   </label>
                   <input
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hot-pink"
                     required
                   />
@@ -296,12 +278,12 @@ const AdminTournaments = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Data de Início
+                      Data do Torneio
                     </label>
                     <input
                       type="date"
-                      value={formData.startDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      value={formData.date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hot-pink"
                       required
                     />
@@ -309,12 +291,12 @@ const AdminTournaments = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Data de Fim
+                      Prazo de Inscrição
                     </label>
                     <input
                       type="date"
-                      value={formData.endDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                      value={formData.registrationDeadline}
+                      onChange={(e) => setFormData(prev => ({ ...prev, registrationDeadline: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hot-pink"
                       required
                     />
@@ -341,8 +323,8 @@ const AdminTournaments = () => {
                   <input
                     type="checkbox"
                     id="registrationOpen"
-                    checked={formData.registrationOpen}
-                    onChange={(e) => setFormData(prev => ({ ...prev, registrationOpen: e.target.checked }))}
+                    checked={formData.isRegistrationOpen}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isRegistrationOpen: e.target.checked }))}
                     className="mr-2"
                   />
                   <label htmlFor="registrationOpen" className="text-sm text-gray-700">
@@ -378,13 +360,13 @@ const AdminTournaments = () => {
             <div key={tournament.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{tournament.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{tournament.title}</h3>
                   <p className="text-sm text-gray-600 mb-3">{tournament.description}</p>
                   
                   <div className="space-y-1 text-sm text-gray-500">
                     <div className="flex items-center gap-2">
                       <FaCalendarAlt />
-                      <span>{tournament.startDate} - {tournament.endDate}</span>
+                      <span>{tournament.date}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <FaUsers />
@@ -415,7 +397,7 @@ const AdminTournaments = () => {
               </div>
 
               <div className="flex gap-2 flex-wrap">
-                {tournament.bracket ? (
+                {(tournament as AdminTournament).bracket ? (
                   <Button
                     onClick={() => setShowBracket(tournament)}
                     size="sm"
@@ -457,7 +439,7 @@ const AdminTournaments = () => {
                 </Button>
                 
                 <Button
-                  onClick={() => deleteTournament(tournament.id)}
+                  onClick={() => handleDeleteTournament(tournament.id)}
                   size="sm"
                   variant="outline"
                   className="flex items-center gap-1 text-red-600 border-red-600 hover:bg-red-50"

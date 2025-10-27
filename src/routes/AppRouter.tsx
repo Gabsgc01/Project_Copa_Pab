@@ -17,6 +17,7 @@ import AdminDashboard from '@/pages/AdminDashboard'
 import AdminUsers from '@/pages/AdminUsers'
 import AdminTournaments from '@/pages/AdminTournaments'
 import AdminBrackets from '@/pages/AdminBrackets'
+import AdminSettings from '@/pages/AdminSettings'
 import PublicBrackets from '@/pages/PublicBrackets'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import AdminRoute from '@/components/AdminRoute'
@@ -134,6 +135,14 @@ const router = createBrowserRouter([
         element: (
             <AdminRoute>
                 <AdminBrackets />
+            </AdminRoute>
+        ),
+    },
+    {
+        path: "/admin/settings",
+        element: (
+            <AdminRoute>
+                <AdminSettings />
             </AdminRoute>
         ),
     }

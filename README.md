@@ -2,6 +2,14 @@
 
 Uma plataforma completa de gerenciamento de torneios de futebol feminino, desenvolvida para a Copa Passa a Bola (Copa PAB). O sistema permite o cadastro de times, gerenciamento de jogadoras, geração automática de chaveamentos e área administrativa completa.
 
+
+## Integrantes do Grupo
+- Gabriel Ciriaco RM: 564880
+- Davi Munhoz RM: 566223
+- Mariana França RM: 562353
+- Vinicius Mafra RM: 565916
+- Larissa Shiba: 560462
+
 ## 🎯 Sobre o Projeto
 
 A Copa PAB Platform é um sistema web moderno que facilita a organização de torneios de futebol feminino. Com foco na experiência do usuário e funcionalidades administrativas robustas, a plataforma oferece:

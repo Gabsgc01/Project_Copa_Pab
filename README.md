@@ -10,6 +10,12 @@ Uma plataforma completa de gerenciamento de torneios de futebol feminino, desenv
 - Vinicius Mafra RM: 565916
 - Larissa Shiba: 560462
 
+
+## Link Vercel 
+
+- Projeto disponivel em : **https://project-copa-pab.vercel.app/**
+
+
 ## 🎯 Sobre o Projeto
 
 A Copa PAB Platform é um sistema web moderno que facilita a organização de torneios de futebol feminino. Com foco na experiência do usuário e funcionalidades administrativas robustas, a plataforma oferece:
@@ -90,7 +96,6 @@ npm install tesseract.js
 npm run dev
 ```
 
-O projeto estará disponível em: **http://localhost:5173/**
 
 *(Se a porta 5173 estiver ocupada, o Vite automaticamente usará a próxima disponível, como 5174)*
 
